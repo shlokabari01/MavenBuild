@@ -32,6 +32,7 @@ node(){
     }
     catch (Exception e){
         currentBuild.result = 'FAILURE'
+        
         echo currentBuild.currentResult
     }finally{
         emailext body: 'Your project is done with deployment.', subject: 'Build Successfully', to: 'shlokabari5@gmail.com'
