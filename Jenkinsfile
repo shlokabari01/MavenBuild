@@ -1,22 +1,39 @@
 
 
 node(){
-def sonarScanner = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-stage('Code Checkout'){
-    git credentialsId: 'Repourl', url: 'https://github.com/hellopriya123/SonarQubeNodeJS_new.git'
+
+    def mvnHome = tool 'MavenBuildTool'
+    def sonarScanner = tool name: 'SonarQube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+
+ 
+
+    
+    try {
+        stage('Checkout Code'){
+            checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'GitHubCred', url: 'https://github.com/shlokabari01/MavenBuild.git']])
+        }
+
+        stage('Maven Build'){
+            sh "${mvnHome}/bin/mvn clean install -Dmaven.test.skip=true"
+        }
+
+        stage('Test Cases Execution'){
+            sh "${mvnHome}/bin/mvn test"
+        }
+
+        stage('SonarQube Analysis'){
+            withSonarQubeEnv(credentialsId: '5b27e7f4-248f-4da0-975d-6717cae07ec9') {
+                sh "${sonarScanner}/bin/sonar-scanner"
+
 }
+        }
 
 
-stage('Build & Test Automation'){
-    sh """
-        ls -lart
-        npm install
-       """
-
-}
-stage('Deployment'){
-      withSonarQubeEnv(credentialsId: 'SonarQubeToken') {
-    sh "${sonarScanner}/bin/sonar-scanner"
     }
-}
+    catch (Exception e){
+        currentBuild.result = 'FAILURE'
+        echo currentBuild.currentResult
+    }finally{
+        emailext body: 'Your build is Done!', recipientProviders: [buildUser(), developers()], subject: 'Build Susessfully', to: 'shlokabari5@gmail.com'
+    }
 }
