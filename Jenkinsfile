@@ -34,6 +34,6 @@ node(){
         currentBuild.result = 'FAILURE'
         echo currentBuild.currentResult
     }finally{
-        emailext body: 'Your build is Done!', recipientProviders: [buildUser(), developers()], subject: 'Build Susessfully', to: 'shlokabari5@gmail.com'
+        emailext body: 'Your project is done with deployment.', subject: 'Build Successfully', to: 'shlokabari5@gmail.com'
     }
 }
